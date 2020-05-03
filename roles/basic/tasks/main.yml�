@@ -1,0 +1,65 @@
+ - name: Installing prerequisites
+   apt: update_cache=yes force_apt_get=yes
+
+ - name: Installing apache2 web server
+   become: true
+   apt: pkg=apache2 state=present
+
+ - name: Installing package MySQL
+   apt: pkg={{ item }} state=present 
+   with_items: 
+     -  mysql-server
+     -  mysql-client
+     -  python-mysqldb
+
+ - name: Create mysql database
+   become: true
+   mysql_db: name={{ item }} state=present
+   with_items:
+      - mr
+      - mt
+      - nk
+      - ns
+      - rs
+      - sv
+      - ts
+
+ - name: Create database user with name 'root' with all database privileges
+   mysql_user:
+     user=root
+     password=""
+     host=localhost
+     state=present
+     update_password=on_create
+     login_unix_socket=/var/run/mysqld/mysqld.sock
+     append_privs=yes
+     priv="{{ item }}.*:ALL"
+   with_items:
+      - mr
+      - mt
+      - nk
+      - ns
+      - rs
+      - sv
+      - ts
+  
+ - name: Installing php and extensions
+   become: true
+   apt: pkg={{ item }} state=present
+   with_items:
+      - php5.5
+      - libapache2-mod-php
+      - php5.5-fpm
+      - php5.5-mysql
+      - php5.5-xml
+      - php5.5-gd
+      - php5.5-curl
+      - php5.5-dom
+
+ - name: Installing package GIT
+   apt: pkg=git state=present
+
+ - name: Adding repository NoviNano on VM
+   git:
+     repo=https://github.com/mplesha/NoviNano.git
+     dest=/var/www/html
